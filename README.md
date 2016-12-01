@@ -1,13 +1,14 @@
 # StudentBookingSystem
 学生火车票订票系统，学生火车票管理系统
-
 效果截图：
+
+
 登陆界面：
 ![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/loginIn.PNG)
 
 
 学生订票-查询已有订单:
-![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E5%AD%A6%E7%94%9F%E8%AE%A2%E7%A5%A8-%E6%9F%A5%E8%AF%A2.PNG)
+![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E5%AD%A6%E7%94%9F%E8%AE%A2%E7%A5%A8-%E7%9B%B4%E6%8E%A5%E6%9F%A5%E8%AF%A2.PNG)
 
 
 学生订票-搜索-添加:
