@@ -23,4 +23,10 @@
 ![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E6%93%8D%E4%BD%9C%E5%91%98-%E6%9F%A5%E6%89%BE%E4%B9%8B%E5%89%8D.PNG)
 
 操作员-按姓名查找:
-![]()
+![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E6%93%8D%E4%BD%9C%E5%91%98-%E6%8C%89%E5%A7%93%E5%90%8D%E6%9F%A5%E6%89%BE.PNG)
+
+操作员-查看全部订单:
+![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E6%93%8D%E4%BD%9C%E5%91%98-%E6%9F%A5%E7%9C%8B%E5%85%A8%E9%83%A8%E8%AE%A2%E5%8D%95.PNG)
+
+操作员-完成退票:
+![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/%E6%93%8D%E4%BD%9C%E5%91%98-%E5%AE%8C%E6%88%90%E9%80%80%E7%A5%A8.PNG)
