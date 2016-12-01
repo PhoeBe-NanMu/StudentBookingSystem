@@ -35,7 +35,7 @@ import static javafx.geometry.Pos.CENTER;
 import static javafx.geometry.Pos.CENTER_RIGHT;
 
 /**
- * Created by leiyang on 2016/11/27.
+ * Created by leiYang on 2016/11/27.
  */
 
 public class SelectTicketForOperator extends Application {
