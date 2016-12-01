@@ -1,7 +1,8 @@
 # StudentBookingSystem
-学生火车票订票系统，学生火车票管理系统
+效果截图:
 
-效果截图：登陆界面:
+登陆界面:
+
 
 ![](https://github.com/PhoeBe-NanMu/StudentBookingSystem/blob/master/pics/loginIn.PNG)
 
