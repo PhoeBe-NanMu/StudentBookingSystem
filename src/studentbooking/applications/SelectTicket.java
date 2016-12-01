@@ -1,0 +1,512 @@
+/*
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates.
+ * All rights reserved. Use is subject to license terms.
+ *
+ * This file is available and licensed under the following license:
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *  - Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  - Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the distribution.
+ *  - Neither the name of Oracle nor the names of its
+ *    contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+package studentbooking.applications;
+ 
+import studentbooking.db.DBHelper;
+import studentbooking.bean.StudentEntity;
+import studentbooking.bean.TicketInfoEntity;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.*;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import static javafx.geometry.Pos.CENTER;
+import static javafx.geometry.Pos.CENTER_RIGHT;
+
+ 
+ 
+public class SelectTicket extends Application {
+
+
+    StudentEntity studentEntity ;
+    TableView tableView = new TableView();
+    String mStart = "出发地";
+    String mEnd = "目的地";
+
+    Label label = new Label();
+
+    ObservableList<TicketInfoEntity> data1 = FXCollections.observableArrayList();
+
+
+    public static void main(String[] args) {
+        launch(SelectTicket.class, args);
+    }
+
+    public SelectTicket(StudentEntity studentEntity) {
+        this.studentEntity = studentEntity;
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException {
+
+        BorderPane border = new BorderPane();
+        HBox hbox = addHBox();
+
+        border.setTop(hbox);
+        border.setLeft(addAnchorPane(addGridPane()));
+
+        addStackPane(hbox);  
+
+      border.setCenter(addCenterPane());
+
+        Scene scene = new Scene(border);
+        scene.getStylesheets().add("studentbooking/css/button.css");
+        stage.setScene(scene);
+        stage.setTitle("学生火车票订票系统");
+        stage.show();
+    }
+    Button submit = new Button("预定");
+    Button cancel = new Button("退票");
+
+    private GridPane addCenterPane() {
+        GridPane  centerGridPane = new GridPane();
+        centerGridPane.setAlignment(CENTER);
+        centerGridPane.setHgap(10.0);
+        centerGridPane.setVgap(10.0);
+        centerGridPane.setPadding(new Insets(10.0,10.0,10.0,10.0));
+        label = new Label(mStart+" ——> "+mEnd);
+        label.getStyleClass().add("label1");
+        centerGridPane.add(label,0,0);
+
+        submit.getStyleClass().add("button3");
+        centerGridPane.add(submit,1,0);
+        submit.setVisible(false);
+
+        cancel.getStyleClass().add("button3");
+        centerGridPane.add(cancel,2,0);
+        cancel.setVisible(false);
+
+        tableView = new TableView();
+        tableView.setId("tableView");
+        tableView.setEditable(true);
+        tableView.setPrefHeight(600);
+
+        TableColumn checkBoxColumn = new TableColumn("勾选");   //选中框
+        checkBoxColumn.setCellFactory(CheckBoxTableCell.forTableColumn(checkBoxColumn));
+        checkBoxColumn.setCellValueFactory(new PropertyValueFactory<>("isSelected"));
+
+        checkBoxColumn.setEditable(true);
+
+
+        TableColumn trainNameCol = new TableColumn("车次");
+        trainNameCol.setCellValueFactory(new PropertyValueFactory<>("trainName"));
+        TableColumn startNameCol = new TableColumn("起点");
+        startNameCol.setCellValueFactory(new PropertyValueFactory<>("startPlace"));
+        TableColumn endNameCol = new TableColumn("终点");
+        endNameCol.setCellValueFactory(new PropertyValueFactory<>("endPlace"));
+        TableColumn remainTicketsCol = new TableColumn("库存");
+        remainTicketsCol.setCellValueFactory(new PropertyValueFactory<>("remainTickets"));
+        TableColumn ticketTypeCol = new TableColumn("车票类型");
+        ticketTypeCol.setCellValueFactory(new PropertyValueFactory<>("ticketType"));
+        TableColumn startTimeCol = new TableColumn("发车时间");
+        startTimeCol.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+        TableColumn endTimeCol = new TableColumn("到达时间");
+        endTimeCol.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+        TableColumn fareCol = new TableColumn("票价");
+        fareCol.setCellValueFactory(new PropertyValueFactory<>("fare"));
+
+
+        tableView.getColumns().addAll(checkBoxColumn,trainNameCol,startNameCol,endNameCol,remainTicketsCol,ticketTypeCol,startTimeCol,endTimeCol,fareCol);
+
+        centerGridPane.add(tableView,0,1,3,1);
+
+        submit.setOnMouseClicked((MouseEvent t)->{
+
+            ObservableList<TicketInfoEntity> mResult = tableView.getItems();
+            System.out.println("mResult.size()" + mResult.size());
+            for (int i = 0; i < mResult.size(); i++) {
+                Boolean aBoolean = mResult.get(i).getIsIsSelected();
+                if (aBoolean){
+
+                    System.out.println("结果集合："+"被点击了"+mResult.get(i).getStartTime());
+                    mResult.get(i).setRemainTickets(mResult.get(i).getRemainTickets()-1);
+//                    saveInfo.add(mResult.get(i));
+                    saveIntoSQL(mResult.get(i));
+
+                } else {
+                    System.out.println("结果集合："+"没有点击"+mResult.get(i).getStartTime());
+                }
+            }
+        });
+
+        cancel.setOnMouseClicked((MouseEvent t)->{
+            ObservableList<TicketInfoEntity> mResult = tableView.getItems();
+            ArrayList<Boolean> mResultCopy = new ArrayList<Boolean>();
+            int size = mResult.size();
+            for (int i = 0; i < size; i++) {
+                mResultCopy.add(mResult.get(i).getIsIsSelected());
+            }
+            System.out.println("mResult.size()" + mResult.size());
+            for (int i = 0; i < size; i++) {
+                if (mResultCopy.get(i)){
+                    System.out.println("结果集合："+"被点击了"+mResult.get(i).getStartTime());
+                    mResult.get(i).setRemainTickets(mResult.get(i).getRemainTickets()+1);
+                    removeFromOrders(mResult.get(i));
+//                    saveInfo.remove(i);
+                    data1.remove(i);
+                }
+            }
+        });
+
+        return centerGridPane;
+    }
+
+    private void removeFromOrders(TicketInfoEntity ticketInfoEntity) {
+        String sqlstr0 = "SELECT * FROM Orders WHERE (train_name = '"+ticketInfoEntity.getTrainName()+"' AND start_time = '"+ticketInfoEntity.getStartTime()+"' AND end_time = '"+ticketInfoEntity.getEndTime()+"')";
+
+        DBHelper dbHelper = new DBHelper();
+        dbHelper.executeSQL(sqlstr0);
+        ResultSet resultSet = dbHelper.getResultSet();
+        String strNum = "201612151212";
+        try {
+            if (resultSet.next()){
+                strNum = resultSet.getString("order_num");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String sqlstr = "DELETE FROM Orders WHERE order_num = '"+strNum+"'";
+        dbHelper.executeSQL(sqlstr);
+        String sqlstrChangeRemain = "UPDATE Orders SET remain_tickets = "+ticketInfoEntity.getRemainTickets()+" WHERE ( train_name = '"+ticketInfoEntity.getTrainName()+"'AND start_place = '"+ticketInfoEntity.getStartPlace()+"' AND end_place = '"+ticketInfoEntity.getEndPlace()+"')";
+        dbHelper.executeSQL(sqlstrChangeRemain);
+
+
+    }
+
+    ArrayList<TicketInfoEntity> saveInfo = new ArrayList<>();
+    private int orderNum = 0;
+
+    private void saveIntoSQL(TicketInfoEntity ticketInfoEntity) {
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String time = sdf.format(date);
+        orderNum++;
+        Date date1 = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String time1 = simpleDateFormat.format(date1);
+
+        String sqlstr = "INSERT INTO Orders VALUES ('"+time1+"','"+studentEntity.getName()+"',"+"'"+time+"',"+"'否',"+"'"+ticketInfoEntity.getTrainName()+"',"+"'"+ticketInfoEntity.getStartPlace()+"',"+"'"+ticketInfoEntity.getEndPlace()+"',"+"'"+ticketInfoEntity.getStartTime()+"',"+"'"+ticketInfoEntity.getEndTime()+"',"+"'"+ticketInfoEntity.getTicketType()+"',"+"'"+ticketInfoEntity.getRemainTickets()+"',"+"'"+ticketInfoEntity.getFare()+"')";
+        DBHelper dbHelper = new DBHelper();
+        dbHelper.executeSQL(sqlstr);
+
+    }
+
+
+    private HBox addHBox() {
+ 
+        HBox hbox = new HBox();
+        hbox.setPadding(new Insets(10, 20, 35, 20));
+        hbox.setSpacing(10);   // Gap between nodes
+        hbox.setStyle("-fx-background-color: #f0f0f0;");
+
+//        Text text = new Text("  学生火车票订票系统");
+//        text.setFont(Font.font("Verdana", FontWeight.BOLD, 30));
+//        text.setFill(Color.valueOf("#0795F4"));
+//
+        Text t = new Text();
+        t.setX(10.0f);
+        t.setY(50.0f);
+        t.setCache(true);
+        t.setText("学生火车票订票系统");
+//        t.setFill(Color.RED);
+        t.setFill(Color.valueOf("#0795F4"));
+        t.setFont(Font.font( 35));
+
+        Reflection r = new Reflection();
+        r.setFraction(0.7f);
+
+        t.setEffect(r);
+
+//        t.setTranslateY(400);
+
+        hbox.getChildren().add(t);
+
+
+        return hbox;
+    }
+
+
+    private void addStackPane(HBox hb) {
+ 
+        StackPane stack = new StackPane();
+        Rectangle helpIcon = new Rectangle(30.0, 25.0);
+        helpIcon.setFill(new LinearGradient(0,0,0,1, true, CycleMethod.NO_CYCLE,
+            new Stop[]{
+            new Stop(0,Color.web("#4977A3")),
+            new Stop(0.5, Color.web("#B0C6DA")),
+            new Stop(1,Color.web("#9CB6CF")),}));
+        helpIcon.setStroke(Color.web("#D0E6FA"));
+        helpIcon.setArcHeight(3.5);
+        helpIcon.setArcWidth(3.5);
+        
+        Text helpText = new Text("?");
+        helpText.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+        helpText.setFill(Color.WHITE);
+        helpText.setStroke(Color.web("#7080A0")); 
+        
+        stack.getChildren().addAll(helpIcon, helpText);
+        stack.setAlignment(CENTER_RIGHT);
+        StackPane.setMargin(helpText, new Insets(0, 10, 0, 0));
+        
+        hb.getChildren().add(stack);
+        HBox.setHgrow(stack, Priority.ALWAYS);
+
+        final Boolean[] flag = {false};
+        stack.setOnMouseClicked((MouseEvent t)->{
+            if (!flag[0]){
+                helpText.setText("制作人：雷阳      ");
+                flag[0] = true;
+            } else {
+                helpText.setText("?");
+                flag[0] = false;
+            }
+        });
+                
+    }
+ 
+
+    private GridPane addGridPane() {
+ 
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(10, 20, 0, 10));
+
+        Text category = new Text("用户："+studentEntity.getName());
+        category.setFont(Font.font( 20));
+        grid.setMargin(category,new Insets(10,0,0,0));
+        grid.add(category, 1,0);
+
+        Text school = new Text("学校："+studentEntity.getUniversity());
+        school.setFont(Font.font(20));
+        grid.add(school, 1, 1);
+
+
+        TextField startCity = new TextField();
+        startCity.setPromptText("出发城市");
+        grid.setMargin(startCity,new Insets(10,0,0,0));
+        GridPane.setConstraints(startCity, 1, 2);
+        grid.getChildren().add(startCity);
+
+        TextField endCity = new TextField();
+        endCity.setPromptText("到达城市");
+        grid.setMargin(endCity,new Insets(5,0,10,0));
+        GridPane.setConstraints(endCity, 1, 3);
+        grid.getChildren().add(endCity);
+
+
+        Text tip1 = new Text("您可以选择");
+        tip1.setFont(Font.font("Arial", 12));
+        tip1.setFill(Color.web("#A2A2A2"));
+        grid.add(tip1,1,4);
+
+        Button searchTicket = new Button();
+        searchTicket.setText("搜索车票");
+        searchTicket.getStyleClass().add("button1");
+        grid.setMargin(searchTicket,new Insets(0,0,10,0));
+        grid.add(searchTicket,1,5);
+
+        Text tip2 = new Text("或者是");
+        tip2.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+        tip2.setFill(Color.web("#A2A2A2"));
+        grid.add(tip2,1,6);
+
+        Button searchOrders = new Button();
+        searchOrders.setText("查看订单");
+        searchOrders.getStyleClass().add("button2");
+        grid.add(searchOrders,1,7);
+
+
+
+        searchTicket.setOnMouseClicked((MouseEvent t)->{
+
+            submit.setVisible(true);
+            cancel.setVisible(false);
+
+            data1.clear();
+            String mStartCity = startCity.getText();
+            String mEndPlace = endCity.getText();
+            if (mStartCity == null || mStartCity.equals(" ") || mStartCity.equals("")){
+                mStartCity = mStart;
+            }else{
+                System.out.println("mStartPlace : "+mStartCity );
+            }
+            if (mEndPlace == null || mEndPlace.equals(" ") || mEndPlace.equals("")){
+                mEndPlace = mEnd;
+            }
+            label.setText(mStartCity+" ——> "+mEndPlace);
+            DBHelper dbHelper = new DBHelper();
+            String sqlstr = "SELECT * FROM Train_Info WHERE station_name = '"+mStartCity+"'";
+            dbHelper.executeSQL(sqlstr);
+            ResultSet resultSet = dbHelper.getResultSet();
+            try {
+                while (resultSet.next()){
+                    String mTrainName = resultSet.getString("train_name");
+                    int num = resultSet.getInt("num");
+                    String mStartTime = resultSet.getString("start_time");
+                    float mStartFare = resultSet.getFloat("fare");
+                    String sqlstr1 = "SELECT * FROM Train_Info WHERE station_name = '"+mEndPlace+"' AND train_name = '"+mTrainName+"'";
+                    DBHelper dbHelper1 = new DBHelper();
+                    dbHelper1.executeSQL(sqlstr1);
+                    ResultSet resultSet1 = dbHelper1.getResultSet();
+                    while(resultSet1.next()){
+                        int endNum = resultSet1.getInt("num");
+                        if (endNum > num) {
+                            String ticketType;
+                            if (studentEntity.getAddress().contains(mEndPlace)){
+                                ticketType = "学生票";
+                            } else{
+                                ticketType = "成人票";
+                            }
+                            float mEndFare = resultSet1.getFloat("fare");
+
+
+                            String trainName = resultSet1.getString("train_name");
+                            String sqlstr2 = "SELECT * from Orders WHERE ( train_name = '"+trainName+"'AND start_place = '"+mStartCity+"' AND end_place = '"+mEndPlace+"')";
+                            DBHelper dbHelper2 = new DBHelper();
+                            dbHelper2.executeSQL(sqlstr2);
+                            ResultSet resultSet2 = dbHelper2.getResultSet();
+                            int remainTickets = 300;
+                            while (resultSet2.next()){
+                                int remain = resultSet2.getInt("remain_tickets");
+                                if (remainTickets > remain){
+                                    remainTickets = remain;
+                                }
+                            }
+
+                            System.out.println(mStartCity+"-->"+mEndPlace);
+                            TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+                            ticketInfoEntity.setTrainName(trainName);
+                            ticketInfoEntity.setStartPlace(mStartCity);
+                            ticketInfoEntity.setEndPlace(mEndPlace);
+                            ticketInfoEntity.setStartTime(mStartTime);
+                            ticketInfoEntity.setEndTime(resultSet1.getString("arrive_time"));
+                            ticketInfoEntity.setTicketType(ticketType);
+                            ticketInfoEntity.setFare(mEndFare-mStartFare+13.5f);
+                            ticketInfoEntity.setRemainTickets(remainTickets);
+                            ticketInfoEntity.setIsSelected(false);
+
+                            data1.add(ticketInfoEntity);
+                            tableView.setItems(data1);
+                            System.out.println("data1.size: "+data1.size()+data1.get(0).getStartTime());
+//                            createTableViewRow(ticketInfoEntity);
+
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+
+        final Boolean[] firstTime = {true};
+
+        searchOrders.setOnMouseClicked((MouseEvent t)->{
+            data1.clear();
+//            if (firstTime[0]){
+                String sqlstr = "SELECT * FROM Orders WHERE name = '"+studentEntity.getName()+"'";
+                DBHelper dbHelper = new DBHelper();
+                dbHelper.executeSQL(sqlstr);
+                ResultSet resultSet = dbHelper.getResultSet();
+                try {
+                    while (resultSet.next()){
+                        TicketInfoEntity ticketInfoEntity = new TicketInfoEntity();
+                        ticketInfoEntity.setRemainTickets(resultSet.getInt("remain_tickets"));
+                        ticketInfoEntity.setIsSelected(false);
+                        ticketInfoEntity.setFare(resultSet.getFloat("fare"));
+                        ticketInfoEntity.setEndPlace(resultSet.getString("end_place"));
+                        ticketInfoEntity.setEndTime(resultSet.getString("end_time"));
+                        ticketInfoEntity.setStartPlace(resultSet.getString("start_place"));
+                        ticketInfoEntity.setStartTime(resultSet.getString("start_time"));
+                        ticketInfoEntity.setTicketType(resultSet.getString("ticket_type"));
+                        ticketInfoEntity.setTrainName(resultSet.getString("train_name"));
+//                        saveInfo.add(ticketInfoEntity);
+
+                        data1.add(ticketInfoEntity);
+                        tableView.setItems(data1);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+//            }else{
+//                for (int i = 0; i < saveInfo.size(); i++) {
+//                    data1.add(saveInfo.get(i));
+//                }
+//            }
+//            firstTime[0] = false;
+
+            submit.setVisible(false);
+            cancel.setVisible(true);
+        });
+        return grid;
+    }
+
+
+    private AnchorPane addAnchorPane(GridPane grid) {
+ 
+        AnchorPane anchorpane = new AnchorPane();
+
+        HBox hb = new HBox();
+        hb.setPadding(new Insets(0, 10, 10, 10));
+        hb.setSpacing(10);
+
+        anchorpane.getChildren().addAll(grid,hb);
+        AnchorPane.setBottomAnchor(hb, 8.0);
+        AnchorPane.setRightAnchor(hb, 5.0);
+        AnchorPane.setTopAnchor(grid, 10.0);
+ 
+        return anchorpane;
+    }
+}

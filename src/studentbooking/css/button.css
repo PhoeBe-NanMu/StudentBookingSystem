@@ -1,0 +1,35 @@
+.button1{
+    -fx-font: bold 20pt "Arial";
+    -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );
+    -fx-text-fill: white;
+    -fx-base: #f0831c;
+}
+.button2{
+    -fx-font: bold 20pt "Arial";
+    -fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );
+    -fx-text-fill: white;
+    -fx-base: #78bd00;
+}
+
+.button3{
+    /*-fx-font: bold 20pt "Arial";*/
+    /*-fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );*/
+    -fx-text-fill: white;
+    -fx-base: #ff9913;
+}
+.button4{
+    /*-fx-font: bold 20pt "Arial";*/
+    /*-fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );*/
+    -fx-text-fill: white;
+    -fx-base: #ce4c3a;
+}
+.button5{
+    -fx-font:  13pt null;
+    /*-fx-effect: dropshadow( one-pass-box , black , 8 , 0.0 , 2 , 0 );*/
+    -fx-text-fill: white;
+    -fx-base: #2577e3;
+}
+.label1{
+    -fx-font: NORMAL 20 Tahoma;
+}
+

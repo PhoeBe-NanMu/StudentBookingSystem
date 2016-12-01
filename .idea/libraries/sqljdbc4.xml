@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="sqljdbc4">
+    <CLASSES>
+      <root url="jar://C:/Program Files/Java/jdk1.8.0_101/jre/lib/ext/sqljdbc4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
