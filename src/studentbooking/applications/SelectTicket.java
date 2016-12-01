@@ -32,6 +32,7 @@
 
 package studentbooking.applications;
  
+import javafx.scene.shape.Circle;
 import studentbooking.db.DBHelper;
 import studentbooking.bean.StudentEntity;
 import studentbooking.bean.TicketInfoEntity;
@@ -130,7 +131,7 @@ public class SelectTicket extends Application {
         tableView = new TableView();
         tableView.setId("tableView");
         tableView.setEditable(true);
-        tableView.setPrefHeight(600);
+        tableView.setPrefHeight(500);
 
         TableColumn checkBoxColumn = new TableColumn("勾选");   //选中框
         checkBoxColumn.setCellFactory(CheckBoxTableCell.forTableColumn(checkBoxColumn));
@@ -281,18 +282,17 @@ public class SelectTicket extends Application {
     private void addStackPane(HBox hb) {
  
         StackPane stack = new StackPane();
-        Rectangle helpIcon = new Rectangle(30.0, 25.0);
+        Circle helpIcon = new Circle(14.5);
         helpIcon.setFill(new LinearGradient(0,0,0,1, true, CycleMethod.NO_CYCLE,
             new Stop[]{
-            new Stop(0,Color.web("#4977A3")),
-            new Stop(0.5, Color.web("#B0C6DA")),
-            new Stop(1,Color.web("#9CB6CF")),}));
-        helpIcon.setStroke(Color.web("#D0E6FA"));
-        helpIcon.setArcHeight(3.5);
-        helpIcon.setArcWidth(3.5);
-        
+            new Stop(0,Color.web("#0078D7")),
+            new Stop(0.5, Color.web("#0078D7")),
+            new Stop(1,Color.web("#0078D7")),}));
+        helpIcon.setStroke(Color.web("#0078D7"));
+
+
         Text helpText = new Text("?");
-        helpText.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
+        helpText.setFont(Font.font("Verdana", FontWeight.BOLD, 15));
         helpText.setFill(Color.WHITE);
         helpText.setStroke(Color.web("#7080A0")); 
         
@@ -306,7 +306,7 @@ public class SelectTicket extends Application {
         final Boolean[] flag = {false};
         stack.setOnMouseClicked((MouseEvent t)->{
             if (!flag[0]){
-                helpText.setText("制作人：雷阳      ");
+                helpText.setText("制作人：雷阳      !");
                 flag[0] = true;
             } else {
                 helpText.setText("?");
